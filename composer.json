@@ -24,6 +24,13 @@
     "php": "^7.4 || ^8.0 || ^8.1",
     "guzzlehttp/guzzle": "^6.0 || ^7.0"
   },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Shadowbane\\DatadogLogger\\Providers\\DataDogServiceProvider"
+      ]
+    }
+  },
   "autoload": {
     "psr-4": {
       "Shadowbane\\DatadogLogger\\": "src/"
