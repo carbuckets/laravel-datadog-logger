@@ -2,7 +2,6 @@
 
 namespace Shadowbane\DatadogLogger\Api;
 
-use Exception;
 use Monolog\Handler\MissingExtensionException;
 use Monolog\Logger;
 use Shadowbane\DatadogLogger\ApiKeyNotFoundException;

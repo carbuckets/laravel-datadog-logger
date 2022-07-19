@@ -1,14 +1,15 @@
 <?php
 
 use Shadowbane\DatadogLogger\Api\CreateDataDogApiLogger;
+use Shadowbane\DatadogLogger\Api\CustomizeFormatter;
 
 return [
-    'datadog-api'   => [
+    'datadog-api' => [
         'driver' => 'custom',
-        'via'    => CreateDataDogApiLogger::class,
+        'via' => CreateDataDogApiLogger::class,
+        'tap' => [CustomizeFormatter::class],
         'apiKey' => env('DATADOG_API_KEY'),
-        'region' => env('DATADOG_REGION', 'eu'),   // eu or us
-        'level'  => env('DATADOG_LEVEL', 'info'),  // choose your minimum level of logging.
+        'level' => env('DATADOG_LEVEL', 'warning'),
         'bubble' => env('DATADOG_BUBBLE', true),
     ],
 ];
