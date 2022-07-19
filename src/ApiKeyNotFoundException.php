@@ -5,7 +5,7 @@ namespace Shadowbane\DatadogLogger;
 use Exception;
 
 /**
- * Class ApiKeyNotFoundException
+ * Class ApiKeyNotFoundException.
  *
  * @extends Exception
  */

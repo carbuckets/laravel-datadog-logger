@@ -3,32 +3,32 @@
 namespace Shadowbane\DatadogLogger\Api;
 
 use GuzzleHttp\Client;
-use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
 use Monolog\Handler\AbstractProcessingHandler;
 use Monolog\Handler\MissingExtensionException;
 use Monolog\Logger;
 
 /**
- * Class DataDogApiHandler
+ * Class DataDogApiHandler.
  *
  * @extends AbstractProcessingHandler
  */
 class DataDogApiHandler extends AbstractProcessingHandler
 {
-    /**
-     * @var string
-     */
+    /** @var string */
     protected string $token;
+
+    /** @var string */
+    protected static string $ENDPOINT = 'https://http-intake.logs.datadoghq.com/api/v2/logs';
 
     /**
      * @param string $token API token supplied by DataDog
      * @param string|int $level The minimum logging level to trigger this handler
-     * @param bool $bubble Whether or not messages that are handled should bubble up the stack.
+     * @param bool $bubble whether or not messages that are handled should bubble up the stack
      *
      * @throws MissingExtensionException If the curl extension is missing
      */
-    public function __construct(string $token, $level = Logger::DEBUG, bool $bubble = true)
+    public function __construct(string $token, $level = Logger::WARNING, bool $bubble = true)
     {
         if (!extension_loaded('curl')) {
             throw new MissingExtensionException('The curl extension is needed to use the DataDogApiHandler');
@@ -38,7 +38,7 @@ class DataDogApiHandler extends AbstractProcessingHandler
     }
 
     /**
-     * Write implementation of AbstractProcessingHandler
+     * Write implementation of AbstractProcessingHandler.
      *
      * @param array $record
      *
@@ -50,7 +50,7 @@ class DataDogApiHandler extends AbstractProcessingHandler
     }
 
     /**
-     * Send the log
+     * Send the log.
      *
      * @param array $record
      *
@@ -62,7 +62,7 @@ class DataDogApiHandler extends AbstractProcessingHandler
             $client = new Client();
             $client->request(
                 'POST',
-                'https://http-intake.logs.datadoghq.com/api/v2/logs',
+                self::$ENDPOINT,
                 [
                     'headers' => [
                         'Content-Type' => 'application/json',
@@ -88,7 +88,7 @@ class DataDogApiHandler extends AbstractProcessingHandler
     {
         $body = [
             'ddsource' => 'laravel',
-            'ddtags' => 'env:' . app()->environment(),
+            'ddtags' => 'env:'.app()->environment(),
             'hostname' => gethostname(),
             'message' => $record['formatted'],
             'service' => config('app.name'),
