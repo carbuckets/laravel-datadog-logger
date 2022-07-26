@@ -11,6 +11,13 @@ use Illuminate\Support\ServiceProvider;
  */
 class DataDogServiceProvider extends ServiceProvider
 {
+    public function boot()
+    {
+        $this->commands([
+            \Shadowbane\DatadogLogger\Commands\SendException::class,
+        ]);
+    }
+
     /**
      * Register laravel-datadog-logger,
      * merge configuration into the logging.channels array.
