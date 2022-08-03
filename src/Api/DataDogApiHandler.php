@@ -88,7 +88,7 @@ class DataDogApiHandler extends AbstractProcessingHandler
     {
         $body = [
             'ddsource' => 'laravel',
-            'ddtags' => 'env:'.app()->environment(),
+            'ddtags' => $this->getTags(),
             'hostname' => gethostname(),
             'message' => $record['formatted'],
             'service' => config('app.name'),
@@ -107,6 +107,21 @@ class DataDogApiHandler extends AbstractProcessingHandler
         }
 
         return $body;
+    }
+
+    /**
+     * Returns string of tags.
+     * The string by default will send current environment.
+     * To override this, you can use DATADOG_ENVIRONMENT
+     * on you .env file.
+     *
+     * @return string
+     */
+    private function getTags(): string
+    {
+        $envString = env('DATADOG_ENVIRONMENT', app()->environment());
+
+        return 'env:'.$envString;
     }
 
     /**
