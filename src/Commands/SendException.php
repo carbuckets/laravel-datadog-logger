@@ -3,16 +3,16 @@
 namespace Shadowbane\DatadogLogger\Commands;
 
 use Illuminate\Console\Command;
-use JetBrains\PhpStorm\Internal\LanguageLevelTypeAware;
+use Throwable;
 
 class TestException extends \Exception
 {
     /**
-     * @param $message
-     * @param $code
-     * @param Throwable|null $previous
+     * @param string  $message
+     * @param int  $code
+     * @param Throwable|null  $previous
      */
-    public function __construct($message = "", $code = 0, Throwable $previous = null)
+    public function __construct(string $message = "", int $code = 0, Throwable $previous = null)
     {
         parent::__construct($message, $code, $previous);
     }
@@ -26,11 +26,11 @@ class SendException extends Command
 
     /**
      * Execute the console command.
+     *
+     * @throws TestException
      */
-    public function handle(): int
+    public function handle() : int
     {
         throw new TestException('This is test exception. Sent at: '.date('Y-m-d H:i:s'), 500);
-
-        return 0;
     }
 }

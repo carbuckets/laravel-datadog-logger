@@ -6,7 +6,9 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Monolog\Handler\AbstractProcessingHandler;
 use Monolog\Handler\MissingExtensionException;
+use Monolog\Level;
 use Monolog\Logger;
+use Monolog\LogRecord;
 
 /**
  * Class DataDogApiHandler.
@@ -40,11 +42,11 @@ class DataDogApiHandler extends AbstractProcessingHandler
     /**
      * Write implementation of AbstractProcessingHandler.
      *
-     * @param array $record
+     * @param LogRecord $record
      *
      * @return void
      */
-    protected function write(array $record): void
+    protected function write(LogRecord $record): void
     {
         $this->send($record);
     }
@@ -52,11 +54,11 @@ class DataDogApiHandler extends AbstractProcessingHandler
     /**
      * Send the log.
      *
-     * @param array $record
+     * @param LogRecord $record
      *
      * @return void
      */
-    protected function send(array $record): void
+    protected function send(LogRecord $record): void
     {
         try {
             $client = new Client();
@@ -80,24 +82,24 @@ class DataDogApiHandler extends AbstractProcessingHandler
      * Create the body of the log to send
      * to DataDog via the API.
      *
-     * @param array $record
+     * @param LogRecord $record
      *
      * @return array
      */
-    private function createBody(array $record): array
+    private function createBody(LogRecord $record): array
     {
         $body = [
             'ddsource' => 'laravel',
             'ddtags' => $this->getTags(),
             'hostname' => gethostname(),
-            'message' => $record['formatted'],
+            'message' => $record->formatted,
             'service' => config('app.name'),
-            'status' => $this->getLogStatus($record['level_name']),
+            'status' => $this->getLogStatus($record->level),
         ];
 
-        if (!blank($record['context']) && $record['context']['exception'] instanceof \Exception) {
+        if (!blank($record->context) && $record->context['exception'] instanceof \Exception) {
             /** @var \Exception $exception */
-            $exception = $record['context']['exception'];
+            $exception = $record->context['exception'];
             $body['error.kind'] = $exception->getCode();
             $body['error.message'] = $exception->getMessage();
             $body['error.stack'] = $exception->getTraceAsString();
@@ -127,14 +129,14 @@ class DataDogApiHandler extends AbstractProcessingHandler
     /**
      * Translate Laravel error to DataDog error.
      *
-     * @param string $status
+     * @param Level $status
      *
      * @return string
      */
-    private function getLogStatus(string $status): string
+    private function getLogStatus(Level $status): string
     {
         // convert to lowercase to prevent error
-        $status = strtolower($status);
+        $status = strtolower($status->getName());
 
         if (in_array($status, ['debug', 'info'])) {
             return 'info';

@@ -21,7 +21,8 @@
   "homepage": "https://github.com/shadowbane/laravel-datadog-logger",
   "license": "MIT",
   "require": {
-    "php": "^7.4 || ^8.0 || ^8.1",
+    "php": "^8.0 || ^8.1 || ^8.2",
+    "ext-json": "*",
     "guzzlehttp/guzzle": "^6.0 || ^7.0"
   },
   "extra": {
@@ -31,9 +32,16 @@
       ]
     }
   },
+  "config": {
+    "sort-packages": true
+  },
   "autoload": {
     "psr-4": {
       "Shadowbane\\DatadogLogger\\": "src/"
     }
+  },
+  "require-dev": {
+    "orchestra/testbench": "^6.0",
+    "phpstan/phpstan": "^1.8"
   }
 }
