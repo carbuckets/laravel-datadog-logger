@@ -97,7 +97,7 @@ class DataDogApiHandler extends AbstractProcessingHandler
             'status' => $this->getLogStatus($record->level),
         ];
 
-        if (!blank($record->context) && $record->context['exception'] instanceof \Exception) {
+        if (!blank($record->context) && isset($record->context['exception']) && $record->context['exception'] instanceof \Exception) {
             /** @var \Exception $exception */
             $exception = $record->context['exception'];
             $body['error.kind'] = $exception->getCode();
@@ -136,13 +136,13 @@ class DataDogApiHandler extends AbstractProcessingHandler
     private function getLogStatus(Level $status): string
     {
         // convert to lowercase to prevent error
-        $status = strtolower($status->getName());
+        $statusString = strtolower($status->getName());
 
-        if (in_array($status, ['debug', 'info'])) {
+        if (in_array($statusString, ['debug', 'info'])) {
             return 'info';
         }
 
-        if (in_array($status, ['notice', 'warning'])) {
+        if (in_array($statusString, ['notice', 'warning'])) {
             return 'warn';
         }
 
