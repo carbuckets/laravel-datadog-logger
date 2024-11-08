@@ -3,6 +3,7 @@
 namespace Shadowbane\DatadogLogger\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class TestException extends \Exception
@@ -29,8 +30,17 @@ class SendException extends Command
      *
      * @throws TestException
      */
-    public function handle() : int
+    public function handle() : void
     {
-        throw new TestException('This is test exception. Sent at: '.date('Y-m-d H:i:s'), 500);
+        try {
+            throw new TestException('This is test exception. Sent at: ' . date('Y-m-d H:i:s'), 500);
+        } catch (TestException $e) {
+            // We catch the log, to prevent showing stacktrace on console, as this exception is expected.
+            Log::channel('datadog-api')
+                ->error($e->getMessage(), [
+                    'exception' => $e,
+                ]);
+            $this->error($e->getMessage());
+        }
     }
 }

@@ -4,6 +4,7 @@ namespace Shadowbane\DatadogLogger\Api;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
+use Illuminate\Support\Facades\Log;
 use Monolog\Handler\AbstractProcessingHandler;
 use Monolog\Handler\MissingExtensionException;
 use Monolog\Level;
@@ -20,9 +21,6 @@ class DataDogApiHandler extends AbstractProcessingHandler
     /** @var string */
     protected string $token;
 
-    /** @var string */
-    protected static string $ENDPOINT = 'https://http-intake.logs.datadoghq.com/api/v2/logs';
-
     /**
      * @param string $token API token supplied by DataDog
      * @param string|int $level The minimum logging level to trigger this handler
@@ -37,6 +35,16 @@ class DataDogApiHandler extends AbstractProcessingHandler
         }
         $this->token = $token;
         parent::__construct($level, $bubble);
+    }
+
+    /**
+     * Get endpoint used to send the logs.
+     *
+     * @return string
+     */
+    protected function getEndpoint(): string
+    {
+        return config('logging.channels.datadog-api.endpoint', 'https://http-intake.logs.datadoghq.com/api/v2/logs');
     }
 
     /**
@@ -64,16 +72,24 @@ class DataDogApiHandler extends AbstractProcessingHandler
             $client = new Client();
             $client->request(
                 'POST',
-                self::$ENDPOINT,
+                $this->getEndpoint(),
                 [
                     'headers' => [
                         'Content-Type' => 'application/json',
                         'DD-API-KEY' => $this->token,
+                        'Accept-Encoding' => 'gzip',
                     ],
                     'body' => json_encode($this->createBody($record)),
                 ]
             );
         } catch (GuzzleException $e) {
+            $errLoggingChannel = config('logging.channels.datadog-api.error');
+            if ($errLoggingChannel) {
+                Log::channel($errLoggingChannel)->critical($e->getMessage(), [
+                    'exception' => $e,
+                ]);
+            }
+
             return;
         }
     }
@@ -95,6 +111,7 @@ class DataDogApiHandler extends AbstractProcessingHandler
             'message' => $record->formatted,
             'service' => config('app.name'),
             'status' => $this->getLogStatus($record->level),
+            'timestamp' => now()->getPreciseTimestamp(3),
         ];
 
         if (!blank($record->context) && isset($record->context['exception']) && $record->context['exception'] instanceof \Exception) {
