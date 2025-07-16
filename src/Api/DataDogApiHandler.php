@@ -28,7 +28,7 @@ class DataDogApiHandler extends AbstractProcessingHandler
      *
      * @throws MissingExtensionException If the curl extension is missing
      */
-    public function __construct(string $token, $level = Logger::WARNING, bool $bubble = true)
+    public function __construct(string $token, string|int $level = Logger::WARNING, bool $bubble = true)
     {
         if (!extension_loaded('curl')) {
             throw new MissingExtensionException('The curl extension is needed to use the DataDogApiHandler');
