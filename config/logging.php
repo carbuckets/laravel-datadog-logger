@@ -9,8 +9,8 @@ return [
         'via' => CreateDataDogApiLogger::class,
         'tap' => [CustomizeFormatter::class],
         'endpoint' => env('DATADOG_API_ENDPOINT', 'https://http-intake.logs.datadoghq.com/api/v2/logs'),
-        'apiKey' => env('DATADOG_API_KEY'),
-        'level' => env('DATADOG_LEVEL', 'warning'),
+        'apiKey' => env('DATADOG_API_KEY', env('DD_API_KEY')),
+        'level' => env('DATADOG_LEVEL', env('LOG_LEVEL', 'warning')),
         'bubble' => env('DATADOG_BUBBLE', true),
 
         /*
