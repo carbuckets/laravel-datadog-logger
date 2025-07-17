@@ -109,10 +109,14 @@ class DataDogApiHandler extends AbstractProcessingHandler
             'ddtags' => $this->getTags(),
             'hostname' => gethostname(),
             'message' => $record->formatted,
-            'service' => config('app.name'),
+            'service' => env('DD_SERVICE', config('app.name')),
             'status' => $this->getLogStatus($record->level),
             'timestamp' => now()->getPreciseTimestamp(3),
         ];
+
+        if (!blank($record->context) && isset($record->context['tenant'])) {
+            $body['weelz.tenant'] = $record->context['tenant'];
+        }
 
         if (!blank($record->context) && isset($record->context['exception']) && $record->context['exception'] instanceof \Exception) {
             /** @var \Exception $exception */
