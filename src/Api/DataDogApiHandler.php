@@ -122,6 +122,14 @@ class DataDogApiHandler extends AbstractProcessingHandler
             $body['weelz.tenant'] = $record->context['tenant'];
         }
 
+        if (function_exists('\DDTrace\current_context')) {
+            $dd_trace = \DDTrace\current_context();
+            $body['extra']['dd'] = [
+                'trace_id' => $dd_trace['trace_id'],
+                'span_id' => $dd_trace['span_id'],
+            ];
+        }
+
         if (!blank($record->context) && isset($record->context['exception']) && $record->context['exception'] instanceof \Exception) {
             /** @var \Exception $exception */
             $exception = $record->context['exception'];
