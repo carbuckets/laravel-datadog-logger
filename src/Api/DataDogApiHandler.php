@@ -4,6 +4,7 @@ namespace Shadowbane\DatadogLogger\Api;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Monolog\Handler\AbstractProcessingHandler;
 use Monolog\Handler\MissingExtensionException;
@@ -104,11 +105,14 @@ class DataDogApiHandler extends AbstractProcessingHandler
      */
     private function createBody(LogRecord $record): array
     {
+        $hostname = parse_url(config('app.url'), PHP_URL_HOST) ?: gethostname();
+
         $body = [
             'ddsource' => 'laravel',
             'ddtags' => $this->getTags(),
-            'hostname' => gethostname(),
+            'hostname' => $hostname,
             'message' => $record->formatted,
+            'context' => $record->context,
             'service' => env('DD_SERVICE', config('app.name')),
             'status' => $this->getLogStatus($record->level),
             'timestamp' => now()->getPreciseTimestamp(3),
@@ -126,6 +130,8 @@ class DataDogApiHandler extends AbstractProcessingHandler
             $body['error.stack'] = $exception->getTraceAsString();
 
             // replace message with exception class
+            $body['context'] = Arr::except($record->context, ['exception']);
+            $body['context']['message_ref'] = $record->message;
             $body['message'] = get_class($exception);
         }
 
